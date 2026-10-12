@@ -22,3 +22,15 @@ As operações de demonstração não usam o banco de produção da ReUse. Não 
 ## Entrega acadêmica
 
 Este repositório contém código, configuração, testes e instruções. A integração IBM real exige credenciais e validação externa. O PDF da entrega é fornecido separadamente.
+
+## Alternativa local sem cartão: IBM Granite
+
+O modo `granite` usa um modelo aberto IBM executado com Ollama no computador. **Não é IBM Watson e não atende literalmente ao requisito de integração Watson da FIAP.** Ações de gerenciamento seguem controladas pelo backend demonstrativo; orientações livres são geradas pelo Granite.
+
+1. Instale Ollama em https://ollama.com/download
+2. No terminal execute `ollama pull granite3.3:2b`.
+3. Configure `ASSISTANT_MODE=granite` em `.env` e `OLLAMA_MODEL=granite3.3:2b`.
+4. Execute `npm start` e abra `http://localhost:3000`.
+5. Teste `Pausar anúncios`, confirme com `Sim`, depois `Reativar anúncios` e faça uma pergunta como `Como cadastrar um item?`.
+
+Ollama deve continuar aberto. A primeira resposta pode demorar. O tamanho do modelo e os requisitos de RAM dependem do equipamento. Mantenha o modo `watson` para eventual acesso institucional IBM. Não use este modo como evidência de execução no Watson.
