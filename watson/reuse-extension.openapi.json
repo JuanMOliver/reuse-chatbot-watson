@@ -1,0 +1,73 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ReUse Watson Extension",
+    "version": "1.0.0",
+    "description": "API de demonstração de ofertas e trocas ReUse. Necessita HTTPS público e chave da extensão."
+  },
+  "servers": [
+    {
+      "url": "https://YOUR-PUBLIC-HOST.example"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ExtensionKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-reuse-extension-key"
+      }
+    }
+  },
+  "security": [
+    {
+      "ExtensionKey": []
+    }
+  ],
+  "paths": {
+    "/api/extension/items": {
+      "get": {
+        "operationId": "listOffers",
+        "summary": "Consultar ofertas do usuário demonstrativo",
+        "responses": {
+          "200": {
+            "description": "Ofertas e resumo"
+          }
+        }
+      }
+    },
+    "/api/extension/trades": {
+      "get": {
+        "operationId": "listTradeRequests",
+        "summary": "Consultar solicitações de troca",
+        "responses": {
+          "200": {
+            "description": "Solicitações"
+          }
+        }
+      }
+    },
+    "/api/extension/items/pause-all": {
+      "post": {
+        "operationId": "pauseAllOffers",
+        "summary": "Pausar anúncios após confirmação na ação conversacional",
+        "responses": {
+          "200": {
+            "description": "Resultado da pausa"
+          }
+        }
+      }
+    },
+    "/api/extension/items/resume-all": {
+      "post": {
+        "operationId": "resumeAllOffers",
+        "summary": "Reativar anúncios após confirmação na ação conversacional",
+        "responses": {
+          "200": {
+            "description": "Resultado da reativação"
+          }
+        }
+      }
+    }
+  }
+}
