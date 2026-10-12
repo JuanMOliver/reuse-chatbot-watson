@@ -33,10 +33,14 @@ export async function graniteChat(message, sessionId, options = {}) {
       method: 'POST',
       headers: {'content-type':'application/json'},
       body: JSON.stringify({ model, stream: false, messages: [{role:'system', content:knowledge}, {role:'user', content:message}], options:{temperature:0.2} }),
-      signal: AbortSignal.timeout(45_000)
+      signal: AbortSignal.timeout(Number(process.env.OLLAMA_TIMEOUT_MS || 180_000))
     });
-  } catch {
-    throw new Error('O Ollama não está acessível. Instale e abra o Ollama, execute: ollama pull ' + model);
+  } catch (error) {
+    if (error?.name === 'TimeoutError' || error?.name === 'AbortError') {
+      throw new Error('Tempo de resposta do Granite excedido. O Ollama pode estar carregando o modelo; confira o PowerShell com: ollama run ' + model);
+    }
+    const code = error?.cause?.code ? ' (' + error.cause.code + ')' : '';
+    throw new Error('Não foi possível conectar ao Ollama em ' + endpoint + code + '. Verifique se o Ollama está aberto e a URL OLLAMA_URL no .env.');
   }
   if (!response.ok) {
     const detail = await response.text().catch(()=> '');
