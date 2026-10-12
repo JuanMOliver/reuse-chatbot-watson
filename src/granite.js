@@ -4,6 +4,8 @@ const normalize = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300
 const actionPhrases = [
   /\b(pausar|suspender|desativar)\b.*\b(oferta|anuncio|anuncios|item|itens)\b/,
   /\b(reativar|ativar|retomar)\b.*\b(oferta|anuncio|anuncios|item|itens)\b/,
+  /\b(quero|preciso|desejo|abrir|iniciar|novo)\b.*\b(cadastrar|adicionar|publicar|anunciar|novo item)\b/,
+  /^(cadastrar|adicionar|publicar) (um |novo )?item$/,
   /\b(minhas ofertas|meus anuncios|meus itens|listar|quantos anuncios|ver ofertas|minhas solicitacoes|meus pedidos|solicitacoes recebidas|pedidos recebidos|troca recebida|status da troca|acompanhar troca)\b/,
   /^(sim|confirmar|confirmo|pode|ok|yes|nao|cancelar|voltar|desistir)$/,
   /^(oi|ola|ajuda|menu|inicio|comecar|bom dia|boa tarde|boa noite)$/
