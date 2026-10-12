@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "ReUse Watson Extension",
-    "version": "1.0.0",
-    "description": "API de demonstração de ofertas e trocas ReUse. Necessita HTTPS público e chave da extensão."
+    "title": "ReUse — Watson Custom Extension",
+    "version": "1.1.0",
+    "description": "Ações reais sobre o inventário demonstrativo ReUse. Servidor próprio HTTPS e chave de extensão obrigatórios. Confirmação de ações destrutivas deve ocorrer no fluxo conversacional antes de invocar POST."
   },
   "servers": [
     {
-      "url": "https://YOUR-PUBLIC-HOST.example"
+      "url": "https://SUBSTITUA-PELA-URL-DO-SERVIDOR.example"
     }
   ],
   "components": {
@@ -15,7 +15,90 @@
       "ExtensionKey": {
         "type": "apiKey",
         "in": "header",
-        "name": "x-reuse-extension-key"
+        "name": "x-reuse-extension-key",
+        "description": "Chave armazenada no IBM como segredo; nunca publicar no GitHub."
+      }
+    },
+    "schemas": {
+      "Offer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TradeRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "item": {
+            "type": "string"
+          },
+          "with": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "integer"
+          },
+          "paused": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "requests": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "ActionResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "affected": {
+            "type": "integer"
+          },
+          "activeCount": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
       }
     }
   },
@@ -28,10 +111,34 @@
     "/api/extension/items": {
       "get": {
         "operationId": "listOffers",
-        "summary": "Consultar ofertas do usuário demonstrativo",
+        "summary": "Consultar ofertas ativas e pausadas",
         "responses": {
           "200": {
-            "description": "Ofertas e resumo"
+            "description": "Inventário do usuário demonstrativo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Offer"
+                      }
+                    },
+                    "summary": {
+                      "$ref": "#/components/schemas/Summary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave inválida"
           }
         }
       }
@@ -42,7 +149,28 @@
         "summary": "Consultar solicitações de troca",
         "responses": {
           "200": {
-            "description": "Solicitações"
+            "description": "Solicitações e estados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "requests": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TradeRequest"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave inválida"
           }
         }
       }
@@ -50,10 +178,20 @@
     "/api/extension/items/pause-all": {
       "post": {
         "operationId": "pauseAllOffers",
-        "summary": "Pausar anúncios após confirmação na ação conversacional",
+        "summary": "Pausar todas as ofertas — solicitar confirmação antes desta chamada",
         "responses": {
           "200": {
-            "description": "Resultado da pausa"
+            "description": "Quantidade de anúncios afetados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave inválida"
           }
         }
       }
@@ -61,10 +199,20 @@
     "/api/extension/items/resume-all": {
       "post": {
         "operationId": "resumeAllOffers",
-        "summary": "Reativar anúncios após confirmação na ação conversacional",
+        "summary": "Reativar todas as ofertas — solicitar confirmação antes desta chamada",
         "responses": {
           "200": {
-            "description": "Resultado da reativação"
+            "description": "Quantidade de anúncios afetados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave inválida"
           }
         }
       }
