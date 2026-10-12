@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {demoChat} from './chat-demo.js';
-import {listItems,requests,summary,setAll,resetStore} from './store.js';
+import {listItems,requests,summary,setAll,resetStore,createItem} from './store.js';
 import {watsonChat,watsonReady} from './watson.js';
 import {graniteChat} from './granite.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -16,6 +16,7 @@ function secure(req){const expected=process.env.EXTENSION_API_KEY;if(!expected||
 http.createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');const p=url.pathname;
  if(p==='/api/status'&&req.method==='GET')return json(res,200,{ok:true,mode:process.env.ASSISTANT_MODE==='granite'?'granite':process.env.ASSISTANT_MODE==='watson'?'watson':'demo',ibmConfigured:watsonReady(),summary:summary()});
  if(p==='/api/items'&&req.method==='GET')return json(res,200,{items:listItems(),summary:summary()});
+ if(p==='/api/items'&&req.method==='POST'){if(process.env.NODE_ENV==='production')return json(res,403,{error:'Cadastro público desabilitado até implementar login e autorização.'});const b=await body(req);try{return json(res,201,createItem(b));}catch(e){return json(res,422,{error:e.message});}}
  if(p==='/api/requests'&&req.method==='GET')return json(res,200,{requests:requests()});
  if(p==='/api/chat'&&req.method==='POST'){const b=await body(req);if(typeof b.message!=='string'||b.message.length>500)return json(res,400,{error:'Mensagem inválida (máximo 500 caracteres)'});const id=String(b.sessionId||'anonymous').slice(0,80);if(process.env.ASSISTANT_MODE==='watson'){if(!watsonReady())return json(res,503,{error:'Configure o IBM no .env'});try{return json(res,200,await watsonChat(b.message,id));}catch(e){return json(res,502,{error:e.message});}}if(process.env.ASSISTANT_MODE==='granite'){try{return json(res,200,await graniteChat(b.message,id));}catch(e){return json(res,503,{error:e.message});}}return json(res,200,demoChat(b.message,id));}
  if(p.startsWith('/api/extension/')){if(!secure(req))return json(res,401,{error:'Token inválido'});if(p==='/api/extension/items'&&req.method==='GET')return json(res,200,{success:true,items:listItems(),summary:summary()});if(p==='/api/extension/trades'&&req.method==='GET')return json(res,200,{success:true,requests:requests()});if(p==='/api/extension/items/pause-all'&&req.method==='POST')return json(res,200,setAll(false));if(p==='/api/extension/items/resume-all'&&req.method==='POST')return json(res,200,setAll(true));}
